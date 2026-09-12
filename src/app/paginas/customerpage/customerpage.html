@@ -1,12 +1,15 @@
 <po-page-list p-title="Customer List">
-    <po-list-view 
+    @if (isLoading) {
+        <po-loading-overlay [p-screen-lock]="true"></po-loading-overlay>
+    }
+    <po-list-view
         [p-items]="customerList"
-        p-property-title="name"
-    
+        p-property-title="nome"
+
     >
         <ng-template p-list-view-content-template let-customer>
             <div class="po-row">
-                <po-info class="po-sm-10 po-md-2 po-lg-2 po-xl-2 " p-label="Codigo" [p-value]="customer.Codigo" />
+                <po-info class="po-sm-10 po-md-2 po-lg-2 po-xl-2 " p-label="Codigo" [p-value]="customer.codigo" />
                 <po-info class="po-sm-2 po-md-2 po-lg-2 po-xl-2 " p-label="Loja" [p-value]="customer.loja" />
                 <po-info class="po-sm-2 po-md-2 po-lg-2 po-xl-2 " p-label="Endereco" [p-value]="customer.endereco" />
                 <po-info class="po-sm-2 po-md-2 po-lg-2 po-xl-2 " p-label="Telefone" [p-value]="customer.telefone" />

@@ -1,15 +1,16 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { PoInfoModule, PoListViewModule, PoPageModule } from "@po-ui/ng-components";
+import { PoInfoModule, PoListViewModule, PoLoadingModule, PoPageModule } from "@po-ui/ng-components";
 import { Customer } from '../../services/customer';
 
 @Component({
   selector: 'app-customerpage',
-  imports: [PoPageModule,PoListViewModule,PoInfoModule],
+  imports: [PoPageModule,PoListViewModule,PoInfoModule,PoLoadingModule],
   templateUrl: './customerpage.html',
   styleUrl: './customerpage.css',
 })
 export class Customerpage implements OnInit {
   public customerList: Array<Customer> = []
+  public isLoading = false
   #customerService = inject(Customer)
 
   ngOnInit(): void {
@@ -17,6 +18,7 @@ export class Customerpage implements OnInit {
 
   }
   loadData():void{
+    this.isLoading = true
     let req = this.#customerService.getCustomers()
 
     req.subscribe({
@@ -24,11 +26,13 @@ export class Customerpage implements OnInit {
         this.customerList = value.items
       },
 
-      error(err){
+      error: (err:any) => {
         console.log(`error req customer list`,err)
+        this.isLoading = false
       },
-      complete(){
+      complete: () => {
         console.log(`complete customer list`)
+        this.isLoading = false
       }
     })
 
