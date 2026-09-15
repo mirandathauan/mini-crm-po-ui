@@ -1,0 +1,12 @@
+.po-list-view-add-button {
+    display: flex;
+    align-items: flex-end;
+    padding-bottom: 4px;
+}
+
+.po-list-view-error {
+    color: var(--color-feedback-negative-base, #dc3545);
+    font-size: 0.85rem;
+    margin-top: 4px;
+    display: block;
+}
