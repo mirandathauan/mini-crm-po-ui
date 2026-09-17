@@ -10,3 +10,14 @@
     margin-top: 4px;
     display: block;
 }
+
+.po-list-view-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.po-cart-total {
+    text-align: right;
+    margin-top: 8px;
+}

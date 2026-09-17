@@ -1,4 +1,4 @@
-<po-page-list p-title="Product List">
+<po-page-list p-title="Product List" [p-actions]="pageActions">
     @if (isLoading) {
         <po-loading-overlay [p-screen-lock]="true"></po-loading-overlay>
     }
@@ -13,8 +13,9 @@
                 <po-info class="po-sm-2 po-md-2 po-lg-2 po-xl-2 " p-label="Categoria" [p-value]="product.categoria" />
                 <po-info class="po-sm-2 po-md-2 po-lg-2 po-xl-2 " p-label="UM" [p-value]="product.um" />
                 <po-info class="po-sm-2 po-md-2 po-lg-2 po-xl-2 " p-label="Preco" [p-value]="(product.preco | currency:'BRL') ?? ''" />
-                <div class="po-sm-12 po-md-2 po-lg-2 po-xl-2">
+                <div class="po-sm-12 po-md-2 po-lg-2 po-xl-2 po-list-view-actions">
                     <po-button p-label="Exibir detalhes" p-kind="tertiary" (p-click)="toggleDetalhes(product)"></po-button>
+                    <po-button p-icon="an an-shopping-cart" p-label="add" p-kind="tertiary"></po-button>
                 </div>
             </div>
 
@@ -36,5 +37,17 @@
             }
         </ng-template>
     </po-list-view>
+
+    <po-modal #cartModal p-title="Carrinho de compras">
+        @if (cartItems.length === 0) {
+            <p>Nenhum item adicionado ao carrinho.</p>
+        } @else {
+            <po-table
+                [p-items]="cartItems"
+                [p-columns]="cartColumns"
+            ></po-table>
+            <p class="po-cart-total"><strong>Total: {{ cartTotalValor | currency:'BRL' }}</strong></p>
+        }
+    </po-modal>
 
 </po-page-list>
