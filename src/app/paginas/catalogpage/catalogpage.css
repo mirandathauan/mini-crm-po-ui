@@ -21,3 +21,10 @@
     text-align: right;
     margin-top: 8px;
 }
+
+.po-cart-item {
+    align-items: center;
+    border-bottom: 1px solid var(--color-neutral-light-20, #e6e6e6);
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+}

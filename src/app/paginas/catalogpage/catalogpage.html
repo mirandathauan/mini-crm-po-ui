@@ -15,7 +15,7 @@
                 <po-info class="po-sm-2 po-md-2 po-lg-2 po-xl-2 " p-label="Preco" [p-value]="(product.preco | currency:'BRL') ?? ''" />
                 <div class="po-sm-12 po-md-2 po-lg-2 po-xl-2 po-list-view-actions">
                     <po-button p-label="Exibir detalhes" p-kind="tertiary" (p-click)="toggleDetalhes(product)"></po-button>
-                    <po-button p-icon="an an-shopping-cart" p-label="add" p-kind="tertiary"></po-button>
+                    <po-button p-icon="an an-shopping-cart" p-label="add" p-kind="tertiary" (p-click)="irParaCarrinho(product)"></po-button>
                 </div>
             </div>
 
@@ -42,10 +42,23 @@
         @if (cartItems.length === 0) {
             <p>Nenhum item adicionado ao carrinho.</p>
         } @else {
-            <po-table
-                [p-items]="cartItems"
-                [p-columns]="cartColumns"
-            ></po-table>
+            @for (item of cartItems; track item.codigo) {
+                <div class="po-row po-cart-item">
+                    <po-info class="po-sm-3 po-md-3 po-lg-3 po-xl-3" p-label="Codigo" [p-value]="item.codigo" />
+                    <po-info class="po-sm-9 po-md-3 po-lg-3 po-xl-3" p-label="Nome" [p-value]="item.nome" />
+                    <po-number
+                        class="po-sm-6 po-md-2 po-lg-2 po-xl-2"
+                        p-label="Quantidade"
+                        [(ngModel)]="item.quantidade"
+                        [ngModelOptions]="{standalone: true}"
+                        (ngModelChange)="atualizarQuantidade(item)"
+                    ></po-number>
+                    <po-info class="po-sm-6 po-md-2 po-lg-2 po-xl-2" p-label="Subtotal" [p-value]="(itemSubtotal(item) | currency:'BRL') ?? ''" />
+                    <div class="po-sm-12 po-md-2 po-lg-2 po-xl-2 po-list-view-actions">
+                        <po-button p-icon="an an-trash" p-label="Remover" p-kind="tertiary" (p-click)="removerItem(item)"></po-button>
+                    </div>
+                </div>
+            }
             <p class="po-cart-total"><strong>Total: {{ cartTotalValor | currency:'BRL' }}</strong></p>
         }
     </po-modal>

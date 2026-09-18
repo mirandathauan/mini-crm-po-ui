@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { PoButtonModule, PoFieldModule, PoInfoModule, PoListViewModule, PoLoadingModule, PoModalComponent, PoModalModule, PoPageAction, PoPageModule, PoTableModule } from "@po-ui/ng-components";
+import { PoButtonModule, PoFieldModule, PoInfoModule, PoListViewModule, PoLoadingModule, PoModalComponent, PoModalModule, PoPageAction, PoPageModule } from "@po-ui/ng-components";
 import { Product } from '../../services/product';
 
 @Component({
   selector: 'app-catalogpage',
-  imports: [CommonModule,FormsModule,PoPageModule,PoListViewModule,PoInfoModule,PoLoadingModule,PoButtonModule,PoFieldModule,PoModalModule,PoTableModule],
+  imports: [CommonModule,FormsModule,PoPageModule,PoListViewModule,PoInfoModule,PoLoadingModule,PoButtonModule,PoFieldModule,PoModalModule],
   templateUrl: './catalogpage.html',
   styleUrl: './catalogpage.css',
 })
@@ -14,13 +14,6 @@ export class Catalogpage implements OnInit {
   public productList: Array<any> = []
   public isLoading = false
   public cartItems: Array<any> = []
-  public cartColumns: Array<any> = [
-    { property: 'codigo', label: 'Codigo' },
-    { property: 'nome', label: 'Nome' },
-    { property: 'quantidade', label: 'Quantidade' },
-    { property: 'preco', label: 'Preco', type: 'currency', format: 'BRL' },
-    { property: 'acoes', label: '', type: 'icon', icons: [{ icon: 'an an-trash', action: this.removerItem.bind(this), tooltip: 'Remover' }] }
-  ]
   @ViewChild('cartModal') cartModal!: PoModalComponent
   #productService = inject(Product)
 
@@ -84,20 +77,40 @@ export class Catalogpage implements OnInit {
     }
 
     product.quantidadeErro = ''
+    this.#adicionarAoCarrinho(product, product.quantidade)
+    product.quantidade = null
+    this.abrirCarrinho()
+  }
 
+  irParaCarrinho(product:any):void{
+    this.#adicionarAoCarrinho(product, product.quantidade && product.quantidade > 0 ? product.quantidade : 1)
+    product.quantidade = null
+    product.quantidadeErro = ''
+    this.abrirCarrinho()
+  }
+
+  #adicionarAoCarrinho(product:any, quantidade:number):void{
     const itemExistente = this.cartItems.find(item => item.codigo === product.codigo)
     if(itemExistente){
-      itemExistente.quantidade += product.quantidade
+      itemExistente.quantidade += quantidade
     } else {
       this.cartItems.push({
         codigo: product.codigo,
         nome: product.nome,
         preco: product.preco,
-        quantidade: product.quantidade
+        quantidade: quantidade
       })
     }
+  }
 
-    product.quantidade = null
+  atualizarQuantidade(item:any):void{
+    if(!item.quantidade || item.quantidade <= 0){
+      item.quantidade = 1
+    }
+  }
+
+  itemSubtotal(item:any):number{
+    return item.quantidade * item.preco
   }
 
   abrirCarrinho():void{
