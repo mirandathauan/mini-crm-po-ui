@@ -2,6 +2,18 @@
     @if (isLoading) {
         <po-loading-overlay [p-screen-lock]="true"></po-loading-overlay>
     }
+    <div class="po-row">
+        <po-select
+            class="po-sm-12 po-md-5 po-lg-4 po-xl-4"
+            p-label="Filtrar cliente"
+            p-placeholder="Todos os clientes"
+            [p-options]="customerOptions"
+            [ngModel]="customerFiltro"
+            (ngModelChange)="customerFiltro = $event"
+            [ngModelOptions]="{standalone: true}"
+            (p-change)="filtrarCliente()"
+        ></po-select>
+    </div>
     <po-list-view
         [p-items]="customerList"
         p-property-title="nome"
