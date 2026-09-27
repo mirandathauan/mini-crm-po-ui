@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { PoButtonModule, PoFieldModule, PoInfoModule, PoListViewModule, PoLoadingModule, PoModalComponent, PoModalModule, PoPageAction, PoPageModule } from "@po-ui/ng-components";
+import { PoButtonModule, PoFieldModule, PoInfoModule, PoListViewModule, PoLoadingModule, PoModalComponent, PoModalModule, PoNotificationService, PoPageAction, PoPageModule, PoSelectOption } from "@po-ui/ng-components";
 import { Product } from '../../services/product';
+import { Customer } from '../../services/customer';
 
 @Component({
   selector: 'app-catalogpage',
@@ -14,8 +15,12 @@ export class Catalogpage implements OnInit {
   public productList: Array<any> = []
   public isLoading = false
   public cartItems: Array<any> = []
+  public customerOptions: Array<PoSelectOption> = []
+  public clienteSelecionado: number | null = null
   @ViewChild('cartModal') cartModal!: PoModalComponent
   #productService = inject(Product)
+  #customerService = inject(Customer)
+  #notification = inject(PoNotificationService)
 
   get pageActions(): Array<PoPageAction> {
     return [
@@ -37,6 +42,7 @@ export class Catalogpage implements OnInit {
 
   ngOnInit(): void {
     this.loadData()
+    this.loadCustomers()
 
   }
   loadData():void{
@@ -65,12 +71,30 @@ export class Catalogpage implements OnInit {
 
   }
 
+  loadCustomers():void{
+    this.#customerService.getCustomers().subscribe({
+      next: (value:any) => {
+        this.customerOptions = (value.items ?? []).map((customer:any, index:number) => ({
+          label: `${customer.codigo} - ${customer.nome}`,
+          value: index
+        }))
+      },
+      error: (err:any) => {
+        console.log(`error req customer list`,err)
+      }
+    })
+  }
+
   toggleDetalhes(product:any):void{
     product.mostrarDetalhes = !product.mostrarDetalhes
     product.quantidadeErro = ''
   }
 
   adicionarItem(product:any):void{
+    if(!this.#validarClienteSelecionado()){
+      return
+    }
+
     if(!product.quantidade || product.quantidade <= 0){
       product.quantidadeErro = 'Informe uma quantidade maior que zero'
       return
@@ -83,10 +107,22 @@ export class Catalogpage implements OnInit {
   }
 
   irParaCarrinho(product:any):void{
+    if(!this.#validarClienteSelecionado()){
+      return
+    }
+
     this.#adicionarAoCarrinho(product, product.quantidade && product.quantidade > 0 ? product.quantidade : 1)
     product.quantidade = null
     product.quantidadeErro = ''
     this.abrirCarrinho()
+  }
+
+  #validarClienteSelecionado():boolean{
+    if(this.clienteSelecionado === null){
+      this.#notification.warning('Selecione um cliente antes de adicionar itens ao carrinho')
+      return false
+    }
+    return true
   }
 
   #adicionarAoCarrinho(product:any, quantidade:number):void{
@@ -103,10 +139,11 @@ export class Catalogpage implements OnInit {
     }
   }
 
-  atualizarQuantidade(item:any):void{
+  confirmarQuantidade(item:any):void{
     if(!item.quantidade || item.quantidade <= 0){
       item.quantidade = 1
     }
+    this.#notification.success('Quantidade atualizada')
   }
 
   itemSubtotal(item:any):number{

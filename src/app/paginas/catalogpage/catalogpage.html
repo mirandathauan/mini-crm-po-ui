@@ -2,6 +2,17 @@
     @if (isLoading) {
         <po-loading-overlay [p-screen-lock]="true"></po-loading-overlay>
     }
+    <div class="po-row">
+        <po-select
+            class="po-sm-12 po-md-5 po-lg-4 po-xl-4"
+            p-label="Cliente"
+            p-placeholder="Selecione um cliente"
+            [p-options]="customerOptions"
+            [ngModel]="clienteSelecionado"
+            (ngModelChange)="clienteSelecionado = $event"
+            [ngModelOptions]="{standalone: true}"
+        ></po-select>
+    </div>
     <po-list-view
         [p-items]="productList"
         p-property-title="nome"
@@ -24,6 +35,7 @@
                     <po-number
                         class="po-sm-6 po-md-3 po-lg-3 po-xl-3"
                         p-label="Quantidade"
+                        [p-min]="0"
                         [(ngModel)]="product.quantidade"
                         [ngModelOptions]="{standalone: true}"
                     ></po-number>
@@ -49,12 +61,13 @@
                     <po-number
                         class="po-sm-6 po-md-2 po-lg-2 po-xl-2"
                         p-label="Quantidade"
+                        [p-min]="1"
                         [(ngModel)]="item.quantidade"
                         [ngModelOptions]="{standalone: true}"
-                        (ngModelChange)="atualizarQuantidade(item)"
                     ></po-number>
                     <po-info class="po-sm-6 po-md-2 po-lg-2 po-xl-2" p-label="Subtotal" [p-value]="(itemSubtotal(item) | currency:'BRL') ?? ''" />
                     <div class="po-sm-12 po-md-2 po-lg-2 po-xl-2 po-list-view-actions">
+                        <po-button p-icon="an an-check" p-label="OK" p-kind="primary" (p-click)="confirmarQuantidade(item)"></po-button>
                         <po-button p-icon="an an-trash" p-label="Remover" p-kind="tertiary" (p-click)="removerItem(item)"></po-button>
                     </div>
                 </div>
