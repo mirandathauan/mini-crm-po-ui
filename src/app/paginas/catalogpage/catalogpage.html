@@ -9,7 +9,7 @@
             p-placeholder="Selecione um cliente"
             [p-options]="customerOptions"
             [ngModel]="clienteSelecionado"
-            (ngModelChange)="clienteSelecionado = $event"
+            (ngModelChange)="selecionarCliente($event)"
             [ngModelOptions]="{standalone: true}"
         ></po-select>
     </div>
@@ -51,10 +51,13 @@
     </po-list-view>
 
     <po-modal #cartModal p-title="Carrinho de compras">
+        @if (isLoadingCart) {
+            <po-loading-overlay [p-screen-lock]="false"></po-loading-overlay>
+        }
         @if (cartItems.length === 0) {
             <p>Nenhum item adicionado ao carrinho.</p>
         } @else {
-            @for (item of cartItems; track item.codigo) {
+            @for (item of cartItems; track item.id) {
                 <div class="po-row po-cart-item">
                     <po-info class="po-sm-3 po-md-3 po-lg-3 po-xl-3" p-label="Codigo" [p-value]="item.codigo" />
                     <po-info class="po-sm-9 po-md-3 po-lg-3 po-xl-3" p-label="Nome" [p-value]="item.nome" />
