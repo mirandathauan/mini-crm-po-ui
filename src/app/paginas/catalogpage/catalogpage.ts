@@ -19,14 +19,14 @@ export class Catalogpage implements OnInit {
   public customers: Array<any> = []
   public customerOptions: Array<PoSelectOption> = []
   public clienteSelecionado: number | null = null
-  public cartCodigo: string | null = null
   public isLoadingCart = false
+  public isFinalizando = false
   @ViewChild('cartModal') cartModal!: PoModalComponent
   #productService = inject(Product)
   #customerService = inject(Customer)
   #cartService = inject(Cart)
   #notification = inject(PoNotificationService)
-  #proximoItemId = 1
+  #rascunhos: Map<number, Array<any>> = new Map()
 
   get clienteAtual(): any | null {
     return this.clienteSelecionado !== null ? this.customers[this.clienteSelecionado] : null
@@ -102,17 +102,29 @@ export class Catalogpage implements OnInit {
   }
 
   selecionarCliente(valor:number | null):void{
+    this.#salvarRascunhoAtual()
     this.clienteSelecionado = valor
     this.#carregarCarrinhoCliente()
   }
 
+  #salvarRascunhoAtual():void{
+    if(this.clienteSelecionado !== null){
+      this.#rascunhos.set(this.clienteSelecionado, this.cartItems)
+    }
+  }
+
   #carregarCarrinhoCliente():void{
     const cliente = this.clienteAtual
+    const clienteIndex = this.clienteSelecionado
 
-    if(!cliente){
+    if(!cliente || clienteIndex === null){
       this.cartItems = []
-      this.cartCodigo = null
-      this.#proximoItemId = 1
+      return
+    }
+
+    const rascunho = this.#rascunhos.get(clienteIndex)
+    if(rascunho){
+      this.cartItems = rascunho
       return
     }
 
@@ -132,8 +144,7 @@ export class Catalogpage implements OnInit {
             quantidade: registro.item.quantidade
           }))
 
-        this.#proximoItemId = itens.reduce((max:number, registro:any) => Math.max(max, registro.id), 0) + 1
-        this.cartCodigo = res?.codigo || null
+        this.#rascunhos.set(clienteIndex, this.cartItems)
         this.isLoadingCart = false
       },
       error: (err:any) => {
@@ -182,64 +193,28 @@ export class Catalogpage implements OnInit {
 
   #adicionarAoCarrinho(product:any, quantidade:number):void{
     const itemExistente = this.cartItems.find(item => item.codigo === product.codigo)
-    let item:any
 
     if(itemExistente){
       itemExistente.quantidade += quantidade
-      item = itemExistente
     } else {
-      item = {
-        id: this.#proximoItemId++,
+      const proximoId = this.cartItems.reduce((max:number, item:any) => Math.max(max, item.id), 0) + 1
+      this.cartItems.push({
+        id: proximoId,
         codigo: product.codigo,
         nome: product.nome,
         preco: product.preco,
         quantidade: quantidade
-      }
-      this.cartItems.push(item)
+      })
     }
 
-    this.#sincronizarItemERP(item, true)
-  }
-
-  #sincronizarItemERP(item:any, ativo:boolean):void{
-    const cliente = this.clienteAtual
-    if(!cliente){
-      return
-    }
-
-    const body = {
-      codCliente: cliente.codigo,
-      lojCliente: cliente.loja,
-      nomeCliente: cliente.nome,
-      itens: [{
-        id: item.id,
-        ativo: ativo,
-        item: {
-          codigo: item.codigo,
-          nome: item.nome,
-          quantidade: item.quantidade,
-          preco: item.preco
-        }
-      }],
-      valor: this.cartTotalValor
-    }
-
-    this.#cartService.postCart(body).subscribe({
-      next: (res:any) => {
-        this.cartCodigo = res?.codigo ?? this.cartCodigo
-      },
-      error: (err:any) => {
-        console.log(`error post cart`,err)
-        this.#notification.error('Erro ao sincronizar carrinho com o ERP')
-      }
-    })
+    this.#salvarRascunhoAtual()
   }
 
   confirmarQuantidade(item:any):void{
     if(!item.quantidade || item.quantidade <= 0){
       item.quantidade = 1
     }
-    this.#sincronizarItemERP(item, true)
+    this.#salvarRascunhoAtual()
     this.#notification.success('Quantidade atualizada')
   }
 
@@ -253,6 +228,71 @@ export class Catalogpage implements OnInit {
 
   removerItem(item:any):void{
     this.cartItems = this.cartItems.filter(cartItem => cartItem !== item)
-    this.#sincronizarItemERP(item, false)
+    this.#salvarRascunhoAtual()
+  }
+
+  finalizarCompra():void{
+    const cliente = this.clienteAtual
+
+    if(!cliente){
+      this.#notification.warning('Selecione um cliente antes de finalizar a compra')
+      return
+    }
+
+    if(this.cartItems.length === 0){
+      this.#notification.warning('Adicione itens ao carrinho antes de finalizar a compra')
+      return
+    }
+
+    this.isFinalizando = true
+
+    const body = {
+      codCliente: cliente.codigo,
+      lojCliente: cliente.loja,
+      nomeCliente: cliente.nome,
+      itens: this.cartItems.map((item:any) => ({
+        id: item.id,
+        ativo: true,
+        item: {
+          codigo: item.codigo,
+          nome: item.nome,
+          quantidade: item.quantidade,
+          preco: item.preco
+        }
+      })),
+      valor: this.cartTotalValor
+    }
+
+    this.#cartService.postCart(body).subscribe({
+      next: (res:any) => {
+        const codigoCarrinho = res?.codigo
+
+        if(!codigoCarrinho){
+          this.isFinalizando = false
+          this.#notification.error('ERP não retornou o código do carrinho')
+          return
+        }
+
+        this.#cartService.confirmCart(cliente.codigo, cliente.loja, codigoCarrinho).subscribe({
+          next: (confirmRes:any) => {
+            this.isFinalizando = false
+            this.#notification.success(`Compra finalizada! Orçamento: ${confirmRes.codigo}`)
+            this.cartItems = []
+            this.#salvarRascunhoAtual()
+            this.cartModal.close()
+          },
+          error: (err:any) => {
+            console.log(`error confirm cart`,err)
+            this.isFinalizando = false
+            this.#notification.error('Erro ao confirmar a compra no ERP')
+          }
+        })
+      },
+      error: (err:any) => {
+        console.log(`error post cart`,err)
+        this.isFinalizando = false
+        this.#notification.error('Erro ao enviar carrinho para o ERP')
+      }
+    })
   }
 }

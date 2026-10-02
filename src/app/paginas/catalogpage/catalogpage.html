@@ -76,6 +76,16 @@
                 </div>
             }
             <p class="po-cart-total"><strong>Total: {{ cartTotalValor | currency:'BRL' }}</strong></p>
+            <div class="po-row po-cart-finalizar">
+                <div class="po-sm-12 po-md-4 po-lg-4 po-xl-4">
+                    <po-button
+                        p-label="Finalizar Compra"
+                        p-kind="primary"
+                        [p-loading]="isFinalizando"
+                        (p-click)="finalizarCompra()"
+                    ></po-button>
+                </div>
+            </div>
         }
     </po-modal>
 

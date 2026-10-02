@@ -28,3 +28,8 @@
     padding-bottom: 8px;
     margin-bottom: 8px;
 }
+
+.po-cart-finalizar {
+    justify-content: flex-end;
+    margin-top: 8px;
+}
