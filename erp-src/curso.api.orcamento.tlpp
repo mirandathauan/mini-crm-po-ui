@@ -1,0 +1,122 @@
+#include 'totvs.ch'
+#include 'tlpp-core.th'
+
+namespace curso.api.orcamento
+
+/*/{Protheus.doc} U_GETORCAMENTOS
+    Funcao para uso via API para consulta dos dados dos orcamentos de vendas (MATA415)
+    @type  Function
+    @author Klaus Wolfgram
+    /*/
+    @get('/curso/api/orcamentos')
+Function U_GETORCAMENTOS() as logical
+
+    Local cAliasSQL     as character
+    Local cFilOrc       as character
+    Local cNumero       as character
+    Local nPage         as variant
+    Local nPageSize     as variant
+    Local jQueryPar     as json  
+    Local jHeaderReq    as json
+    Local jHeaderRes    as json
+    Local jOrcamento    as json
+    Local jResp         as json
+    Local bLastError    as codeblock
+
+    bLastError          := errorblock({|e| err:= e,break(e)})
+
+    private err         as object
+    err                 := errorClass():new()
+
+    jHeaderRes          := jsonObject():new()
+    jHeaderRes['Content-Type'] := 'application/json'   
+
+    jResp               := jsonObject():new()
+    jResp['orcamentos'] := {}
+
+    BEGIN SEQUENCE  
+
+        jHeaderReq       := oRest:getHeaderRequest()
+        jQueryPar        := oRest:getQueryRequest()
+        cFilOrc          := IF(empty(jQueryPar['filial'  ]),''  ,jQueryPar['filial'  ])
+        cNumero          := IF(empty(jQueryPar['numero'  ]),''  ,jQueryPar['numero'  ])
+        cSearch          := IF(empty(jQueryPar['search'  ]),''  ,jQueryPar['search'  ])
+        cOrder           := IF(empty(jQueryPar['order'   ]),''  ,jQueryPar['order'   ])
+        nPage            := IF(empty(jQueryPar['page'    ]),'1' ,jQueryPar['page'    ])
+        nPageSize        := IF(empty(jQueryPar['pageSize']),'10',jQueryPar['pageSize'])
+        
+        nPage            := val(nPage     )
+        nPageSize        := val(nPageSize ) 
+
+        cAliasSQL        := getNextAlias()
+
+        BeginSQL alias cAliasSQL
+            SELECT DISTINCT
+            CJ_FILIAL   , CJ_NUM    , Z0_CODIGO , CJ_CLIENTE, CJ_LOJA, A1_NOME,
+            CJ_EMISSAO  , CJ_STATUS , CK_ITEM   , CK_PRODUTO, B1_DESC, CK_QTDVEN,
+            CK_PRCVEN   , CK_VALOR
+            FROM %TABLE:SCJ% SCJ
+            JOIN %TABLE:SA1% SA1 ON SA1.D_E_L_E_T_ = ' ' AND A1_COD		= CJ_CLIENTE	AND A1_LOJA = CJ_LOJA
+            JOIN %TABLE:SCK% SCK ON SCK.D_E_L_E_T_ = ' ' AND CK_FILIAL	= CJ_FILIAL		AND CK_NUM	= CJ_NUM 
+            JOIN %TABLE:SB1% SB1 ON SB1.D_E_L_E_T_ = ' ' AND B1_COD		= CK_PRODUTO
+            JOIN %TABLE:SZ0% SZ0 ON SZ0.D_E_L_E_T_ = ' ' AND Z0_NUMSCJ	= CJ_NUM
+            WHERE SCJ.D_E_L_E_T_ = ' ' 
+            ORDER BY CJ_FILIAL, CJ_NUM DESC, CK_ITEM
+        EndSQL
+
+        lNew            := .T.
+
+        While !(cAliasSQL)->(eof())
+
+            IF lNew
+                jOrcamento                 := jsonObject():new()
+                jOrcamento['filial'    ]   := (cAliasSQL)->CJ_FILIAL
+                jOrcamento['numero'    ]   := (cAliasSQL)->CJ_NUM
+                jOrcamento['status'    ]   := (cAliasSQL)->CJ_STATUS
+                jOrcamento['emissao'   ]   := (cAliasSQL)->(dtoc(stod(CJ_EMISSAO)))
+                jOrcamento['cliente'   ]   := (cAliasSQL)->(alltrim(CJ_CLIENTE)+'-'+CJ_LOJA)
+                jOrcamento['nome'      ]   := (cAliasSQL)->(alltrim(A1_NOME))
+                jOrcamento['carrinho'  ]   := (cAliasSQL)->Z0_CODIGO
+                jOrcamento['valor'     ]   := 0
+                jOrcamento['itens'     ]   := {}
+                lNew                       := .F.
+            EndIF
+
+            jItem                           := jsonObject():new()
+            jItem['item'        ]           := (cAliasSQL)->CK_ITEM
+            jItem['produto'     ]           := (cAliasSQL)->CK_PRODUTO
+            jItem['descricao'   ]           := (cAliasSQL)->(alltrim(B1_DESC))
+            jItem['quantidade'  ]           := (cAliasSQL)->CK_QTDVEN
+            jItem['preco'       ]           := (cAliasSQL)->CK_PRCVEN
+            jItem['valor'       ]           := (cAliasSQL)->CK_VALOR
+            
+            jOrcamento['valor'  ]           += jItem['valor']
+
+            aadd(jOrcamento['itens'],jItem)
+            
+            (cAliasSQL)->(dbSkip())
+
+            IF (cAliasSQL)->(eof())
+                aadd(jResp['orcamentos'],jOrcamento)
+            Else    
+                IF (cAliasSQL)->(CJ_FILIAL+CJ_NUM) <> jOrcamento['filial']+jOrcamento['numero']
+                    aadd(jResp['orcamentos'],jOrcamento)
+                    lNew := .T.
+                EndIF    
+            EndIF
+
+        Enddo
+
+        (cAliasSQL)->(dbCloseArea())
+
+    RECOVER
+
+        cErrorDescr := err:description
+        cErrorStack := err:errorstack
+        cVarEnv     := err:errorenv
+
+    END SEQUENCE
+
+    oRest:setResponse(jResp:toJson())         
+
+Return .T.

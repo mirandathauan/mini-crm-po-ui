@@ -1,0 +1,290 @@
+#include 'tlpp-core.th'
+#include 'totvs.ch'
+
+namespace curso.api.cart
+
+@get('/curso/api/cart/itens/:cliente/:loja')
+Function U_GETCART() as logical
+
+    Local jPath         as json
+    Local jRes          as json
+    Local cCodigo       as character
+    Local cLoja         as character
+    Local cAliasSQL     as character
+
+    jPath               := oRest:getPathParamsRequest()
+    
+    cCodigo             := jPath['cliente']
+    cLoja               := jPath['loja']
+    
+    jRes                := jsonObject():new()
+
+    cAliasSQL           := getNextAlias()
+ 
+    BeginSQL alias cAliasSQL
+        SELECT *, D_E_L_E_T_ DEL FROM %table:SZ0% SZ0
+        WHERE Z0_CODCLI = %exp:cCodigo%
+        AND Z0_LOJCLI = %exp:cLoja%
+        AND Z0_NUMSCJ = ' '
+        ORDER BY Z0_ITEM
+    EndSQL
+
+    jRes['codCliente'   ] := ''
+    jRes['lojCliente'   ] := ''
+    jRes['nomeCliente'  ] := ''
+    jRes['itens'        ] := array(0)
+    jRes['valor'        ] := 0
+
+    While !(cAliasSQL)->(eof())
+
+        SB1->(dbSetOrder(1),dbSeek(xFilial(alias())+(cAliasSQL)->Z0_CODPRD))
+        SBM->(dbSetOrder(1),dbSeek(xFilial(alias())+SB1->B1_GRUPO))
+
+        jRes['codigo'       ]   := (cAliasSQL)->Z0_CODIGO
+        jRes['codCliente'   ]   := (cAliasSQL)->Z0_CODCLI
+        jRes['lojCliente'   ]   := (cAliasSQL)->Z0_LOJCLI
+        jRes['nomeCliente'  ]   := (cAliasSQL)->Z0_NOME
+        jRes['valor'        ]   += (cAliasSQL)->(IF(empty(DEL),Z0_VALOR,0)) 
+        
+        jProd                   := jsonObject():new()
+        jProd['codigo'      ]   := SB1->B1_COD
+        jProd['nome'        ]   := SB1->(alltrim(B1_DESC))
+        jProd['categoria'   ]   := SBM->(alltrim(BM_DESC))
+        jProd['um'          ]   := SB1->(alltrim(B1_UM  ))
+        jProd['preco'       ]   := (cAliasSQL)->Z0_PRECO
+        jProd['quantidade'  ]   := (cAliasSQL)->Z0_QUANTID
+        jProd['STATUS'      ]   := 'ATIVO'
+
+        jItem                   := jsonObject():new()
+        jItem['id'          ]   := val((cAliasSQL)->Z0_ITEM)
+        jItem['ativo'       ]   := empty((cAliasSQL)->DEL)
+        jItem['item'        ]   := jProd    
+
+        aadd(jRes['itens'],jItem)    
+
+        (cAliasSQL)->(dbSkip())
+
+    Enddo
+
+    (cAliasSQL)->(dbCloseArea())
+
+    oRest:setResponse(jRes:toJson()) 
+
+return .T.
+
+@post('/curso/api/cart/')
+Function U_POSTCART() as logical
+
+    Local jHeader       as json
+    Local jPath         as json
+    Local jBody         as json
+    Local jRes          as json
+    Local cBody         as character
+    Local cCodigo       as character
+    Local cLoja         as character
+    Local cNome         as character
+    Local aItens        as array
+    Local nVlr          as numeric
+    Local lNovo         as logical
+    Local x
+
+    jHeader             := oRest:getHeaderRequest()
+    jPath               := oRest:getPathParamsRequest()
+    cBody               := oRest:getBodyRequest()
+    jBody               := jsonObject():new()
+    jRes                := jsonObject():new()
+    aItens              := array(0)
+    lNovo               := .T.  
+
+    jBody:fromJson(cBody)
+
+    cCodigo             := jBody['codCliente'   ]
+    cLoja               := jBody['lojCliente'   ]
+    cNome               := jBody['nomeCliente'  ]
+    aItens              := jBody['itens'        ]
+    nVlr                := jBody['valor'        ]
+
+    cCodigo             := padr(cCodigo,tamSX3('A1_COD')[1])
+
+    SZ0->(dbSetOrder(1),dbSeek(xFilial(alias())+cCodigo+cLoja))
+
+    IF SZ0->(found())
+        
+        While !SZ0->(eof()) .and. SZ0->(Z0_FILIAL+Z0_CODCLI+Z0_LOJCLI) == xFilial('SZ0')+cCodigo+cLoja
+            SZ0->(dbSkip())
+        Enddo
+
+        SZ0->(dbSkip(-1))
+
+        IF empty(SZ0->Z0_NUMSCJ)
+            lNovo := .F.
+        Else
+            lNovo := .T.
+        EndIF        
+
+    EndIF    
+
+    IF lNovo
+        cCodSZ0 := GETSXENUM("SZ0","Z0_CODIGO")
+        confirmSX8()
+    Else
+        cCodSZ0 := SZ0->Z0_CODIGO    
+    EndIF
+
+    For x := 1 to Len(aItens) 
+
+        cItemSZ0    := strZero(aItens[x]['id'],tamSX3('Z0_ITEM')[1])
+        lInclui     := !SZ0->(dbSetOrder(1),dbSeek(xFilial(alias())+cCodigo+cLoja+cCodSZ0+cItemSZ0))
+
+        IF aItens[x]['ativo']   
+
+            SZ0->(reclock(alias(),lInclui))
+                SZ0->Z0_FILIAL := xFilial('SZ0')
+                SZ0->Z0_CODCLI := cCodigo
+                SZ0->Z0_LOJCLI := cLoja
+                SZ0->Z0_NOME   := cNome
+                SZ0->Z0_CODIGO := cCodSZ0
+                SZ0->Z0_DATA   := date()
+                SZ0->Z0_ITEM   := cItemSZ0
+                SZ0->Z0_CODPRD := aItens[x]['item','codigo'     ]
+                SZ0->Z0_DESPRD := aItens[x]['item','nome'       ]
+                SZ0->Z0_QUANTID:= aItens[x]['item','quantidade' ]
+                SZ0->Z0_PRECO  := aItens[x]['item','preco'      ]
+                SZ0->Z0_VALOR  := SZ0->(Z0_QUANTID * Z0_PRECO)
+            SZ0->(msunlock())
+
+        Else
+
+            IF !lInclui
+                SZ0->(reclock(alias(),.F.),dbDelete(),msunlock())
+            EndIF    
+
+        EndIF  
+
+    Next
+
+    jBody['codigo']     := cCodSZ0
+//  jBody['result']     := 'CARRINHO SINCRONIZADO COM SUCESSO!!'
+    oRest:setResponse(jBody:toJson())      
+
+return .T.
+
+@get('curso/api/cart/confirm/:cliente/:loja/:codigo')
+/*/{Protheus.doc} U_CONFIRM
+    Programa para confirmacao do carrinho de compras com geracao de orcamento
+    @type  Function
+    /*/
+Function U_CONFIRM() as logical
+
+    Local jPath         := oRest:getPathParamsRequest()
+    Local jRes          := jsonObject():new()
+    Local cCliente      := jPath['cliente'  ]
+    Local cLoja         := jPath['loja'     ]
+    Local cCodigo       := jPath['codigo'   ] 
+    Local aCab          := array(0)
+    Local aItem         := array(0)
+    Local aItens        := array(0)
+    Local nItem         := 0
+
+    Private lMsErroAuto := .F.
+
+    cCliente            := padr(cCliente,tamSX3('Z0_CODCLI')[1])
+
+    IF !SZ0->(dbSetOrder(1),dbSeek(xFilial(alias())+cCliente+cLoja+cCodigo))
+        jRes['status'   ] := 'ERRO'
+        jRes['codigo'   ] := ''
+        jRes['mensagem' ] := 'CODIGO DE CARRINHO NAO ENCONTRADO'
+        oRest:setStatusCode(400)
+        oRest:setResponse(jRes:toJson())
+        return .F.
+    EndIF
+
+    IF !empty(SZ0->Z0_NUMSCJ)
+        jRes['status'   ] := 'OK'
+        jRes['codigo'   ] := SZ0->Z0_NUMSCJ
+        jRes['mensagem' ] := 'CADASTRADO ANTERIORMENTE'
+        oRest:setResponse(jRes:toJson())
+        return .T.
+    EndIF       
+
+    aadd(aCab,{'CJ_EMISSAO' ,date()         ,})
+    aadd(aCab,{'CJ_CLIENTE' ,cCliente       ,})
+    aadd(aCab,{'CJ_LOJA'    ,cLoja          ,})
+    aadd(aCab,{'CJ_CONDPAG' ,'001'          ,})
+    aadd(aCab,{'CJ_COTCLI'  ,SZ0->Z0_CODIGO ,})
+
+    While !SZ0->(eof()) .and. SZ0->(Z0_FILIAL+Z0_CODCLI+Z0_LOJCLI+Z0_CODIGO) == xFilial('SZ0')+cCliente+cLoja+cCodigo
+        
+        cItem := strzero(++nItem,tamSX3('Z0_ITEM')[1])
+        aItem := {}
+
+        aadd(aItem,{'CK_ITEM'   ,cItem          ,})
+        aadd(aItem,{'CK_PRODUTO',SZ0->Z0_CODPRD ,})
+        aadd(aItem,{'CK_QTDVEN' ,SZ0->Z0_QUANTID,})
+        aadd(aItem,{'CK_PRCVEN' ,SZ0->Z0_PRECO  ,})
+        aadd(aItem,{'CK_VALOR'  ,SZ0->Z0_VALOR  ,})
+        aadd(aItem,{'CK_TES'    ,'501'          ,})
+
+        aadd(aItens,aItem)
+
+        SZ0->(dbSkip())
+
+    Enddo
+
+    msExecAuto({|x,y| mata415(aCab,aItens,3)})
+
+    IF lMsErroAuto
+        mostraerro('\data\','confirmcart.log')
+        cMsgErr := memoread('\data\confirmcart.log')
+        jRes['status'  ] := 'ERRO'
+        jRes['codigo'  ] := ''
+        jRes['mensagem'] := cMsgErr
+        oRest:setStatusCode(500)
+        oRest:setResponse(jRes:toJson())
+        return .F.
+    EndIF
+
+    // Nao confia no posicionamento do alias SCJ apos o msExecAuto, pois em
+    // ambiente com varias requisicoes concorrentes ele pode nao estar
+    // posicionado no orcamento recem-criado por esta chamada. Busca o
+    // registro certo via CJ_COTCLI, que guarda o codigo deste carrinho.
+    Local cAliasCJ  as character
+    Local cNumCJ    as character
+
+    cAliasCJ        := getNextAlias()
+
+    BeginSQL alias cAliasCJ
+        SELECT TOP 1 CJ_NUM
+        FROM %table:SCJ%
+        WHERE CJ_CLIENTE = %exp:cCliente%
+        AND CJ_LOJA      = %exp:cLoja%
+        AND CJ_COTCLI    = %exp:cCodigo%
+        ORDER BY CJ_NUM DESC
+    EndSQL
+
+    IF (cAliasCJ)->(eof())
+        (cAliasCJ)->(dbCloseArea())
+        jRes['status'   ] := 'ERRO'
+        jRes['codigo'   ] := ''
+        jRes['mensagem' ] := 'ORCAMENTO GERADO NAO ENCONTRADO'
+        oRest:setStatusCode(500)
+        oRest:setResponse(jRes:toJson())
+        return .F.
+    EndIF
+
+    cNumCJ          := (cAliasCJ)->CJ_NUM
+
+    (cAliasCJ)->(dbCloseArea())
+
+    SZ0->(dbSetOrder(1),dbSeek(xFilial(alias())+cCliente+cLoja+cCodigo))
+
+    While !SZ0->(eof()) .and. SZ0->(Z0_FILIAL+Z0_CODCLI+Z0_LOJCLI+Z0_CODIGO) == xFilial('SZ0')+cCliente+cLoja+cCodigo
+        SZ0->(reclock(alias(),.F.), Z0_NUMSCJ := cNumCJ, msunlock(),dbSkip())
+    Enddo
+
+    jRes['status'   ] := 'OK'
+    jRes['codigo'   ] := cNumCJ
+    jRes['mensagem' ] := 'CADASTRADO COM SUCESSO!!'
+    oRest:setResponse(jRes:toJson())
+
+Return .T.
