@@ -1,4 +1,4 @@
-<po-page-default>
+<po-page-default [p-breadcrumb]="breadcrumb">
   <po-table
     [p-height]="600"
     [p-selectable]="false"
@@ -7,5 +7,28 @@
     [p-items]="orcamentos"
     [p-hide-table-search]="false"
   >
+    <ng-template p-table-row-template let-rowItem let-i="rowIndex">
+            <div class="po-row">
+                <po-info class="po-md-1" [p-value]="rowItem.filial" p-label="Filial"/>
+                <po-info class="po-md-1" [p-value]="rowItem.carrinho" p-label="Carrinho"/>
+                <po-info class="po-md-2" [p-value]="rowItem.emissao" p-label="Emissao"/>
+            </div>
+            <po-divider p-label="Itens de Orçamento" p-border-width="medium"/>
+
+            <div class="po-row">
+                <po-info p-value="Item" class="po-md-1"/>
+                <po-info p-value="Descrição" class="po-md-4"/>
+                <po-info p-value="Quantidade" class="po-md-2"/>
+                <po-info p-value="Valor" class="po-md-2"/>
+            </div>
+            @for(item of rowItem.itens; track item){
+              <div class="po-row">
+                <po-info [p-value]="item.item" class="po-md-1" />
+                <po-info [p-value]="item.descricao" class="po-md-4" />
+                <po-info [p-value]="item.quantidade.toString()" class="po-md-2" />
+                <po-info [p-value]="item.valor.toLocaleString('pt-BR',{style:'currency', currency:'BRL'})" class="po-md-2" />
+              </div>
+}
+    </ng-template>
   </po-table>
 </po-page-default>

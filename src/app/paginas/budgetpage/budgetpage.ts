@@ -1,15 +1,22 @@
 import { Component, inject } from '@angular/core';
-import { PoPageModule, PoTableColumn, PoTableModule } from '@po-ui/ng-components';
+import { PoBreadcrumb, PoDividerModule, PoInfoModule, PoPageModule, PoTableColumn, PoTableModule } from '@po-ui/ng-components';
 import { Orcamento } from '../../classes/orcamento';
 import { BudgetService } from '../../services/budget.service';
 
 @Component({
   selector: 'app-budgetpage',
-  imports: [PoPageModule, PoTableModule],
+  imports: [PoPageModule, PoTableModule, PoInfoModule, PoDividerModule],
   templateUrl: './budgetpage.html',
   styleUrl: './budgetpage.css',
 })
 export class Budgetpage {
+  public breadcrumb: PoBreadcrumb = {
+    items: [
+      { label: 'Home', link: '/home' },
+      { label: 'Orçamentos' }
+    ]
+  }
+
   public tableColumns: PoTableColumn[] = [
     {property: 'status', type: 'subtitle', subtitles: [
       {value: 'A', label: 'Aberto', color: 'color-11', content: 'A'},
