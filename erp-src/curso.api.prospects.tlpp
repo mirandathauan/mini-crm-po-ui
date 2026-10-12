@@ -1,0 +1,303 @@
+#include 'totvs.ch'
+#include 'tlpp-core.th'
+
+namespace curso.api.prospects
+
+/*/{Protheus.doc} U_GETPROSPECTS
+    Programa para consulta @GET do cadastro de prospects
+    @type  Function
+    @author Klaus Wolfgram
+    /*/
+
+    @get('/curso/api/prospects')
+Function U_GETPROSPECTS() as logical
+
+    Local cResult   := ''   as character
+    Local cQuery    := ''   as character
+    Local cWhere    := ''   as character
+    Local cCodigo   := ''   as character
+    Local cLoja     := ''   as character
+    Local cSearch   := ''   as character
+    Local cOrder    := ''   as character
+    Local cFilter   := ''   as character
+    Local nPage     := 1    as variant
+    Local nPageSize := 9999 as variant
+    Local oQuery    := nil  as object
+
+    oQuery          := fwAdapterBaseV2():new('GET',.T.)
+    
+    oQuery:addMapFields('codigo'    ,'US_COD'   ,.T.,.T.)
+    oQuery:addMapFields('loja'      ,'US_LOJA'  ,.T.,.T.)
+    oQuery:addMapFields('tipopessoa','US_PESSOA',.T.,.T.)
+    oQuery:addMapFields('cgc'       ,'US_CGC'   ,.T.,.T.)
+    oQuery:addMapFields('nome'      ,'US_NOME'  ,.T.,.T.)
+    oQuery:addMapFields('email'     ,'US_EMAIL' ,.T.,.T.)
+    oQuery:addMapFields('endereco'  ,'US_END'   ,.T.,.T.)
+    oQuery:addMapFields('ddd'       ,'US_DDD'   ,.T.,.T.)
+    oQuery:addMapFields('telefone'  ,'US_TEL'   ,.T.,.T.)
+    oQuery:addMapFields('status'    ,'US_MSBLQL',.T.,.T.)    
+
+    cQuery := "SELECT #QueryFields# FROM " + retSQLName("SUS") + " SUS WHERE #QueryWhere#"
+    cWhere := "SUS.D_E_L_E_T_ = ' ' "
+
+    jQuery      := oRest:getQueryRequest()
+    cCodigo     := if(empty(jQuery['codigo'  ]),''      ,jQuery['codigo'  ])
+    cLoja       := if(empty(jQuery['loja'    ]),''      ,jQuery['loja'    ]) 
+    cSearch     := if(empty(jQuery['search'  ]),''      ,jQuery['search'  ])
+    cFilter     := if(empty(jQuery['filter'  ]),''      ,jQuery['filter'  ])
+    cOrder      := if(empty(jQuery['order'   ]),''      ,jQuery['order'   ])
+    nPage       := if(empty(jQuery['page'    ]),'1'     ,jQuery['page'    ]) ; nPage       := val(nPage    )
+    nPageSize   := if(empty(jQuery['pageSize']),'9999'  ,jQuery['pageSize']) ; nPageSize   := val(nPageSize)    
+
+    IF !empty(cSearch)
+        cWhere += "AND US_NOME LIKE '%" + alltrim(upper(cSearch)) + "%' "
+    EndIF
+
+    IF !empty(cFilter)
+        cWhere += "AND US_NOME LIKE '%" + alltrim(upper(cFilter)) + "%' "
+    EndIF        
+
+    IF empty(cOrder)
+        cOrder  := 'US_COD DESC,US_LOJA'
+    EndIF
+
+    IF empty(nPage)
+        nPage   := 1
+    EndIF
+
+    IF empty(nPageSize)
+        nPageSize := 10
+    EndIF  
+
+    oQuery:setQuery(cQuery)
+    oQuery:setWhere(cWhere)
+    oQuery:setOrder(cOrder)
+    oQuery:setPageSize(nPageSize)
+    oQuery:setPage(nPage)
+
+    IF oQuery:execute()
+        oQuery:fillGetResponse()
+        cResult := oQuery:getJsonResponse()
+    EndIF 
+
+    oRest:setResponse(cResult)
+
+Return .T.
+
+/*/{Protheus.doc} U_POSTPROSPECT
+    Programa para execucao de requisicao POST para o cadastro de prospects
+    @type  Function
+    @author Klaus Wolfgram
+    @since 15/09/2024
+    @version 1.0
+    /*/
+    @post('curso/api/prospects')
+Function U_POSTPROSPECT()
+
+    Local cBody         as character
+    Local jBody         as json
+    Local jHeader       as json
+    Local jPath         as json
+    Local jQuery        as json
+    Local jResult       as json
+    Local cErrorDescr   as character
+    Local cErrorStack   as character
+    Local lret          as logical
+
+    Private err         as object
+
+    try
+
+        cBody   := oRest:getBodyRequest()
+        
+        jBody   := jsonObject():new()
+        jBody:fromJson(cBody)
+        
+        jHeader := oRest:getHeaderRequest()
+        jPath   := oRest:getPathParamsRequest()
+        jQuery  := oRest:getQueryRequest()
+        jResult := jsonObject():new()
+
+        cCGC    := if(empty(jBody['cgc'          ]),'',jBody['cgc'          ])
+        cNome   := if(empty(jBody['nome'         ]),'',jBody['nome'         ])
+        cContato:= if(empty(jBody['contato'      ]),'',jBody['contato'      ])
+        cEmail  := if(empty(jBody['email'        ]),'',jBody['email'        ])
+        cDDD    := if(empty(jBody['ddd'          ]),'',jBody['ddd'          ])
+        cTel    := if(empty(jBody['telefone'     ]),'',jBody['telefone'     ])
+        cHome   := if(empty(jBody['homepage'     ]),'',jBody['homepage'     ])
+        cTipo   := if(empty(jBody['tipopessoa'   ]),'',jBody['tipopessoa'   ])
+
+        cCGC    := strtran(strtran(strtran(cCGC,".",""),"-",""),"/","")
+        cNome   := upper(fwNoAccent(cNome))
+        cEmail  := lower(fwNoAccent(cEmail))
+        cHome   := lower(fwNoAccent(cHome))
+
+        SUS->(dbSetOrder(1),retOrder("SUS","US_FILIAL+US_CGC"))
+
+        IF empty(cNome)
+
+            err:= errorClass():new()
+            err:description := 'DADOS INVALIDOS'
+
+            throw err
+
+        ElseIF !empty(cCGC) .and. SUS->(dbSetOrder(4),dbSeek(xFilial(alias())+cCGC))
+            
+            jResult['codigo'] := SUS->US_COD
+            jResult['loja'  ] := SUS->US_LOJA
+            jResult['nome'  ] := SUS->US_NOME
+            jResult['status'] := 'CADASTRADO ANTERIORMENTE'
+            
+            lret              := .T.
+
+            oRest:setResponse(jResult:toJson())
+
+        Else
+
+            INCLUI              := .T.
+            SUS->(reclock(alias(),.T.))
+                SUS->US_FILIAL  := xFilial("SUS")
+                SUS->US_COD     := criaVar("US_COD",.T.)
+                SUS->US_LOJA    := '01'
+                SUS->US_TIPO    := 'F'
+                SUS->US_NOME    := cNome
+                SUS->US_NREDUZ  := cContato
+                SUS->US_CGC     := cCGC
+                SUS->US_EMAIL   := cEmail
+                SUS->US_DDD     := cDDD
+                SUS->US_TEL     := cTel
+                SUS->US_PESSOA  := cTipo
+                SUS->US_URL     := cHome
+                SUS->US_ORIGEM  := '4'
+                SUS->US_DTCAD   := date()
+                SUS->US_HRCAD   := LEFT(time(),5)
+                SUS->US_MOEDALC := 1
+                SUS->US_MSBLQL  := '1'
+            SUS->(msunlock())
+
+            lret                  := .T.
+
+            IF __LSX8
+                confirmSX8()
+            EndIF  
+
+            jResult['codigo'] := SUS->US_COD
+            jResult['loja'  ] := SUS->US_LOJA
+            jResult['nome'  ] := SUS->US_NOME
+            jResult['status'] := 'CADASTRADO COM SUCESSO' 
+
+            oRest:setResponse(jResult:toJson())            
+
+        EndIF
+
+    catch err
+
+        cErrorDescr := err:description
+        cErrorStack := err:errorstack
+
+        IF lret
+            
+            jResult['codigo'] := SUS->US_COD
+            jResult['loja'  ] := SUS->US_LOJA
+            jResult['nome'  ] := SUS->US_NOME
+            jResult['status'] := 'CADASTRADO COM SUCESSO' 
+
+            oRest:setResponse(jResult:toJson())
+
+        Else
+            
+            IF __LSX8
+                rollbackSX8()
+            EndIF  
+
+            jResult['codigo'] := ''
+            jResult['loja'  ] := ''
+            jResult['nome'  ] := ''
+            jResult['status'] := 'ERRO'  
+
+            IF !empty(cErrorDescr)
+                jResult['status'] := cErrorDescr
+            EndIF
+
+            oRest:setStatusCode(500)
+            oRest:setResponse(jResult:toJson())
+
+        EndIF
+
+    endtry      
+    
+Return .T.
+
+/*/{Protheus.doc} U_DELPROSPECT
+    Programa para exclusao de prospect via API
+    @type  Function
+    @author Klaus Wolfgram
+    @since 15/09/2024
+    @version 1.0
+    /*/
+    @delete('curso/api/prospects/:chave')
+Function U_DELPROSPECT()
+
+    Local lret          as logical
+    Local jResult       as json
+    Local jQuery        as json
+    Local jPath         as json
+    Local jHeader       as json
+    Local jBody         as json
+    Local cChave        as character
+    Local cErrorDescr   as character
+    Local cErrorStack   as character
+
+    Private err         as object
+
+    try
+
+        lret            := .T.
+        jResult         := jsonObject():new()
+        jQuery          := oRest:getQueryRequest()
+        jPath           := oRest:getPathParamsRequest()
+        jHeader         := oRest:getHeaderRequest()
+        jBody           := jsonObject():new(); jBody:fromJson(oRest:getBodyRequest())
+
+        cChave          := jPath['chave']
+        cChave          := strtran(strtran(cChave,"|",""),"/","")
+
+
+        SUS->(dbSetOrder(1),dbSeek(xFilial(alias())+cChave))
+
+        IF !SUS->(found())
+            err := errorClass():new()
+            err:description :=  'Registro nao encontrado'
+            throw err
+        EndIF    
+
+        IF !empty(SUS->US_CGC)
+            
+            SA1->(dbSetOrder(3),dbSeek(xFilial(alias())+SUS->US_CGC))
+
+            IF SA1->(found())
+                err := errorClass():new()
+                err:description := 'Já existe um cliente cadastrado para este prospect'
+                throw err
+            EndIF
+
+        EndIF
+
+        SUS->(reclock(alias(),.F.), dbDelete(), msunlock())
+
+        jResult['status'] := 'Prospect excluído com sucesso!!'
+        oRest:setResponse(jResult:toJson())
+
+    catch err
+
+        cErrorDescr := err:description
+        cErrorStack := err:errorstack
+
+        jResult['status'] := cErrorDescr
+
+        oRest:setStatusCode(500)
+        oRest:setResponse(jResult:tojson())
+
+    endtry    
+    
+Return lret

@@ -1,0 +1,115 @@
+<po-page-list p-title="Prospects" [p-actions]="pageActions">
+    @if (isLoading) {
+        <po-loading-overlay [p-screen-lock]="true"></po-loading-overlay>
+    }
+    <div class="po-row">
+        <div class="po-sm-6 po-md-2 po-lg-2 po-xl-2">
+            <po-button
+                [p-icon]="sortCampo === 'codigo' && sortDirecao === 'desc' ? 'an an-sort-descending' : 'an an-sort-ascending'"
+                p-label="Ordenar por codigo"
+                p-kind="tertiary"
+                (p-click)="ordenarPor('codigo')"
+            ></po-button>
+        </div>
+        <div class="po-sm-6 po-md-2 po-lg-2 po-xl-2">
+            <po-button
+                [p-icon]="sortCampo === 'nome' && sortDirecao === 'desc' ? 'an an-sort-descending' : 'an an-sort-ascending'"
+                p-label="Ordenar por nome"
+                p-kind="tertiary"
+                (p-click)="ordenarPor('nome')"
+            ></po-button>
+        </div>
+        <po-select
+            class="po-sm-12 po-md-3 po-lg-3 po-xl-3"
+            p-label="Tipo de Pessoa"
+            p-placeholder="Todos"
+            [p-options]="tipoPessoaOptions"
+            [ngModel]="filtroTipoPessoa"
+            (ngModelChange)="filtroTipoPessoa = $event; aplicarFiltro()"
+            [ngModelOptions]="{standalone: true}"
+        ></po-select>
+    </div>
+    <po-list-view
+        [p-items]="prospectList"
+        p-property-title="nome"
+    >
+        <ng-template p-list-view-content-template let-prospect>
+            <div class="po-row">
+                <po-info class="po-sm-10 po-md-2 po-lg-2 po-xl-2 " p-label="Codigo" [p-value]="prospect.codigo" />
+                <po-info class="po-sm-2 po-md-2 po-lg-2 po-xl-2 " p-label="CGC/CPF" [p-value]="prospect.cgc" />
+                <po-info class="po-sm-2 po-md-2 po-lg-2 po-xl-2 " p-label="Email" [p-value]="prospect.email" />
+                <po-info class="po-sm-2 po-md-2 po-lg-2 po-xl-2 " p-label="Telefone" [p-value]="prospect.telefone" />
+                <div class="po-sm-12 po-md-2 po-lg-2 po-xl-2 po-list-view-actions">
+                    <po-button p-icon="an an-trash" p-label="Remover" p-kind="tertiary" (p-click)="removerProspecto(prospect)"></po-button>
+                </div>
+            </div>
+        </ng-template>
+    </po-list-view>
+
+    <po-modal #novoProspectModal p-title="Novo Prospect">
+        <div class="po-row">
+            <po-input
+                class="po-sm-12 po-md-6"
+                p-label="Nome"
+                p-required="true"
+                [(ngModel)]="novoProspect.nome"
+                [ngModelOptions]="{standalone: true}"
+            ></po-input>
+            <po-input
+                class="po-sm-12 po-md-6"
+                p-label="Contato"
+                [(ngModel)]="novoProspect.contato"
+                [ngModelOptions]="{standalone: true}"
+            ></po-input>
+        </div>
+        <div class="po-row">
+            <po-select
+                class="po-sm-12 po-md-4"
+                p-label="Tipo Pessoa"
+                [p-options]="tipoPessoaOptions"
+                [ngModel]="novoProspect.tipopessoa"
+                (ngModelChange)="novoProspect.tipopessoa = $event"
+                [ngModelOptions]="{standalone: true}"
+            ></po-select>
+            <po-input
+                class="po-sm-12 po-md-8"
+                p-label="CGC/CPF"
+                [(ngModel)]="novoProspect.cgc"
+                [ngModelOptions]="{standalone: true}"
+            ></po-input>
+        </div>
+        <div class="po-row">
+            <po-email
+                class="po-sm-12 po-md-6"
+                p-label="Email"
+                [(ngModel)]="novoProspect.email"
+                [ngModelOptions]="{standalone: true}"
+            ></po-email>
+            <po-input
+                class="po-sm-12 po-md-6"
+                p-label="Homepage"
+                [(ngModel)]="novoProspect.homepage"
+                [ngModelOptions]="{standalone: true}"
+            ></po-input>
+        </div>
+        <div class="po-row">
+            <po-input
+                class="po-sm-6 po-md-2"
+                p-label="DDD"
+                [(ngModel)]="novoProspect.ddd"
+                [ngModelOptions]="{standalone: true}"
+            ></po-input>
+            <po-input
+                class="po-sm-6 po-md-4"
+                p-label="Telefone"
+                [(ngModel)]="novoProspect.telefone"
+                [ngModelOptions]="{standalone: true}"
+            ></po-input>
+        </div>
+        <div class="po-row po-prospect-save-button">
+            <div class="po-sm-12 po-md-4">
+                <po-button p-label="Salvar" p-kind="primary" (p-click)="salvarProspecto()"></po-button>
+            </div>
+        </div>
+    </po-modal>
+</po-page-list>

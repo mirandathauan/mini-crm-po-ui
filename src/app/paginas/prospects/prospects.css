@@ -1,0 +1,20 @@
+.po-list-view-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.po-prospect-save-button {
+    margin-top: 8px;
+    justify-content: flex-end;
+}
+
+.po-prospect-filter-group {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.po-prospect-filter-input {
+    flex: 1;
+}
