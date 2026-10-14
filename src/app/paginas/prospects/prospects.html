@@ -48,6 +48,22 @@
 
     <po-modal #novoProspectModal p-title="Novo Prospect">
         <div class="po-row">
+            <po-select
+                class="po-sm-12 po-md-4"
+                p-label="Tipo Pessoa"
+                [p-options]="tipoPessoaOptions"
+                [ngModel]="novoProspect.tipopessoa"
+                (ngModelChange)="novoProspect.tipopessoa = $event"
+                [ngModelOptions]="{standalone: true}"
+            ></po-select>
+            <po-input
+                class="po-sm-12 po-md-8"
+                p-label="CPF/CNPJ"
+                [(ngModel)]="novoProspect.cgc"
+                [ngModelOptions]="{standalone: true}"
+            ></po-input>
+        </div>
+        <div class="po-row">
             <po-input
                 class="po-sm-12 po-md-6"
                 p-label="Nome"
@@ -63,18 +79,10 @@
             ></po-input>
         </div>
         <div class="po-row">
-            <po-select
-                class="po-sm-12 po-md-4"
-                p-label="Tipo Pessoa"
-                [p-options]="tipoPessoaOptions"
-                [ngModel]="novoProspect.tipopessoa"
-                (ngModelChange)="novoProspect.tipopessoa = $event"
-                [ngModelOptions]="{standalone: true}"
-            ></po-select>
             <po-input
-                class="po-sm-12 po-md-8"
-                p-label="CGC/CPF"
-                [(ngModel)]="novoProspect.cgc"
+                class="po-sm-12 po-md-12"
+                p-label="Endereço"
+                [(ngModel)]="novoProspect.endereco"
                 [ngModelOptions]="{standalone: true}"
             ></po-input>
         </div>
