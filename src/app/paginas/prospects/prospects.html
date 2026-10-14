@@ -51,6 +51,7 @@
             <po-select
                 class="po-sm-12 po-md-4"
                 p-label="Tipo Pessoa"
+                p-required="true"
                 [p-options]="tipoPessoaOptions"
                 [ngModel]="novoProspect.tipopessoa"
                 (ngModelChange)="novoProspect.tipopessoa = $event"
@@ -59,6 +60,7 @@
             <po-input
                 class="po-sm-12 po-md-8"
                 p-label="CPF/CNPJ"
+                p-required="true"
                 [(ngModel)]="novoProspect.cgc"
                 [ngModelOptions]="{standalone: true}"
             ></po-input>
@@ -74,6 +76,7 @@
             <po-input
                 class="po-sm-12 po-md-6"
                 p-label="Contato"
+                p-required="true"
                 [(ngModel)]="novoProspect.contato"
                 [ngModelOptions]="{standalone: true}"
             ></po-input>
@@ -82,6 +85,7 @@
             <po-input
                 class="po-sm-12 po-md-12"
                 p-label="Endereço"
+                p-required="true"
                 [(ngModel)]="novoProspect.endereco"
                 [ngModelOptions]="{standalone: true}"
             ></po-input>
@@ -90,12 +94,14 @@
             <po-email
                 class="po-sm-12 po-md-6"
                 p-label="Email"
+                p-required="true"
                 [(ngModel)]="novoProspect.email"
                 [ngModelOptions]="{standalone: true}"
             ></po-email>
             <po-input
                 class="po-sm-12 po-md-6"
                 p-label="Homepage"
+                p-required="true"
                 [(ngModel)]="novoProspect.homepage"
                 [ngModelOptions]="{standalone: true}"
             ></po-input>
@@ -104,12 +110,14 @@
             <po-input
                 class="po-sm-6 po-md-2"
                 p-label="DDD"
+                p-required="true"
                 [(ngModel)]="novoProspect.ddd"
                 [ngModelOptions]="{standalone: true}"
             ></po-input>
             <po-input
                 class="po-sm-6 po-md-4"
                 p-label="Telefone"
+                p-required="true"
                 [(ngModel)]="novoProspect.telefone"
                 [ngModelOptions]="{standalone: true}"
             ></po-input>

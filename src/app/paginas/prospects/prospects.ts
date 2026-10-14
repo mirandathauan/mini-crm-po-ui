@@ -101,8 +101,22 @@ export class Prospects implements OnInit {
   }
 
   salvarProspecto(): void {
-    if (!this.novoProspect.nome) {
-      this.#notification.warning('Informe o nome do prospect')
+    const camposObrigatorios: Array<{ chave: string, label: string }> = [
+      { chave: 'tipopessoa', label: 'Tipo Pessoa' },
+      { chave: 'cgc', label: 'CPF/CNPJ' },
+      { chave: 'nome', label: 'Nome' },
+      { chave: 'contato', label: 'Contato' },
+      { chave: 'endereco', label: 'Endereço' },
+      { chave: 'email', label: 'Email' },
+      { chave: 'homepage', label: 'Home Page' },
+      { chave: 'ddd', label: 'DDD' },
+      { chave: 'telefone', label: 'Telefone' }
+    ]
+
+    const campoFaltante = camposObrigatorios.find((campo) => !this.novoProspect[campo.chave])
+
+    if (campoFaltante) {
+      this.#notification.warning(`Informe o campo ${campoFaltante.label}`)
       return
     }
 
