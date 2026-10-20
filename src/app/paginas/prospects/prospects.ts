@@ -20,6 +20,9 @@ export class Prospects implements OnInit {
     { label: 'Física', value: 'F' },
     { label: 'Jurídica', value: 'J' }
   ]
+  public filtroCodigo: string = ''
+  public filtroNome: string = ''
+  public filtroCgc: string = ''
   public filtroTipoPessoa: string | null = null
   public sortCampo: 'codigo' | 'nome' | null = null
   public sortDirecao: 'asc' | 'desc' = 'asc'
@@ -61,8 +64,17 @@ export class Prospects implements OnInit {
   }
 
   aplicarFiltro(): void {
+    const codigo = this.filtroCodigo.trim().toLowerCase()
+    const nome = this.filtroNome.trim().toLowerCase()
+    const cgc = this.filtroCgc.trim().toLowerCase()
+
     const lista = this.allProspects.filter((prospect: any) => {
-      return !this.filtroTipoPessoa || prospect.tipopessoa === this.filtroTipoPessoa
+      const bateCodigo = !codigo || (prospect.codigo ?? '').toLowerCase().includes(codigo)
+      const bateNome = !nome || (prospect.nome ?? '').toLowerCase().includes(nome)
+      const bateCgc = !cgc || (prospect.cgc ?? '').toLowerCase().includes(cgc)
+      const bateTipoPessoa = !this.filtroTipoPessoa || prospect.tipopessoa === this.filtroTipoPessoa
+
+      return bateCodigo && bateNome && bateCgc && bateTipoPessoa
     })
 
     this.prospectList = this.#ordenarLista(lista)

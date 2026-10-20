@@ -3,6 +3,41 @@
         <po-loading-overlay [p-screen-lock]="true"></po-loading-overlay>
     }
     <div class="po-row">
+        <po-input
+            class="po-sm-12 po-md-3 po-lg-3 po-xl-3"
+            p-label="Código"
+            p-clean="true"
+            [ngModel]="filtroCodigo"
+            (ngModelChange)="filtroCodigo = $event; aplicarFiltro()"
+            [ngModelOptions]="{standalone: true}"
+        ></po-input>
+        <po-input
+            class="po-sm-12 po-md-3 po-lg-3 po-xl-3"
+            p-label="Nome"
+            p-clean="true"
+            [ngModel]="filtroNome"
+            (ngModelChange)="filtroNome = $event; aplicarFiltro()"
+            [ngModelOptions]="{standalone: true}"
+        ></po-input>
+        <po-input
+            class="po-sm-12 po-md-3 po-lg-3 po-xl-3"
+            p-label="CPF/CNPJ"
+            p-clean="true"
+            [ngModel]="filtroCgc"
+            (ngModelChange)="filtroCgc = $event; aplicarFiltro()"
+            [ngModelOptions]="{standalone: true}"
+        ></po-input>
+        <po-select
+            class="po-sm-12 po-md-3 po-lg-3 po-xl-3"
+            p-label="Tipo de Pessoa"
+            p-placeholder="Todos"
+            [p-options]="tipoPessoaOptions"
+            [ngModel]="filtroTipoPessoa"
+            (ngModelChange)="filtroTipoPessoa = $event; aplicarFiltro()"
+            [ngModelOptions]="{standalone: true}"
+        ></po-select>
+    </div>
+    <div class="po-row">
         <div class="po-sm-6 po-md-2 po-lg-2 po-xl-2">
             <po-button
                 [p-icon]="sortCampo === 'codigo' && sortDirecao === 'desc' ? 'an an-sort-descending' : 'an an-sort-ascending'"
@@ -19,15 +54,6 @@
                 (p-click)="ordenarPor('nome')"
             ></po-button>
         </div>
-        <po-select
-            class="po-sm-12 po-md-3 po-lg-3 po-xl-3"
-            p-label="Tipo de Pessoa"
-            p-placeholder="Todos"
-            [p-options]="tipoPessoaOptions"
-            [ngModel]="filtroTipoPessoa"
-            (ngModelChange)="filtroTipoPessoa = $event; aplicarFiltro()"
-            [ngModelOptions]="{standalone: true}"
-        ></po-select>
     </div>
     <po-list-view
         [p-items]="prospectList"
