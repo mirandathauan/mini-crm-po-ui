@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#060818"/>
+      <stop offset="45%" stop-color="#0b1030"/>
+      <stop offset="100%" stop-color="#1b1240"/>
+    </linearGradient>
+    <linearGradient id="line" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00d4ff" stop-opacity="0.05"/>
+      <stop offset="50%" stop-color="#00d4ff" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#7a5cff" stop-opacity="0.05"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#00d4ff" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#00d4ff" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="blur" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+  </defs>
+
+  <rect width="900" height="1200" fill="url(#bg)"/>
+
+  <g stroke="#2a3366" stroke-width="1" opacity="0.35">
+    <path d="M0 100 H900 M0 220 H900 M0 340 H900 M0 460 H900 M0 580 H900 M0 700 H900 M0 820 H900 M0 940 H900 M0 1060 H900"/>
+    <path d="M100 0 V1200 M220 0 V1200 M340 0 V1200 M460 0 V1200 M580 0 V1200 M700 0 V1200 M820 0 V1200"/>
+  </g>
+
+  <g stroke="url(#line)" stroke-width="2" fill="none">
+    <path d="M80 160 L260 260 L460 180 L640 320 L820 240"/>
+    <path d="M140 420 L320 360 L520 460 L700 400 L860 520"/>
+    <path d="M60 660 L240 720 L440 640 L620 760 L800 680"/>
+    <path d="M100 920 L300 980 L500 900 L680 1020 L840 940"/>
+    <path d="M460 180 L520 460 L440 640 L500 900"/>
+    <path d="M260 260 L320 360 L240 720 L300 980"/>
+  </g>
+
+  <g fill="#00d4ff">
+    <circle cx="80" cy="160" r="5" filter="url(#blur)" opacity="0.6"/>
+    <circle cx="260" cy="260" r="4"/>
+    <circle cx="460" cy="180" r="6" filter="url(#blur)" opacity="0.7"/>
+    <circle cx="640" cy="320" r="4"/>
+    <circle cx="820" cy="240" r="5"/>
+    <circle cx="140" cy="420" r="4"/>
+    <circle cx="320" cy="360" r="5" filter="url(#blur)" opacity="0.6"/>
+    <circle cx="520" cy="460" r="4"/>
+    <circle cx="700" cy="400" r="6" filter="url(#blur)" opacity="0.7"/>
+    <circle cx="860" cy="520" r="4"/>
+    <circle cx="60" cy="660" r="5"/>
+    <circle cx="240" cy="720" r="4"/>
+    <circle cx="440" cy="640" r="6" filter="url(#blur)" opacity="0.7"/>
+    <circle cx="620" cy="760" r="4"/>
+    <circle cx="800" cy="680" r="5"/>
+    <circle cx="100" cy="920" r="4"/>
+    <circle cx="300" cy="980" r="6" filter="url(#blur)" opacity="0.6"/>
+    <circle cx="500" cy="900" r="4"/>
+    <circle cx="680" cy="1020" r="5"/>
+    <circle cx="840" cy="940" r="4"/>
+  </g>
+
+  <circle cx="620" cy="900" r="220" fill="url(#glow)" opacity="0.18"/>
+  <circle cx="200" cy="300" r="180" fill="url(#glow)" opacity="0.12"/>
+
+  <g fill="none" stroke="#7a5cff" stroke-width="1.4" opacity="0.5">
+    <circle cx="450" cy="600" r="70"/>
+    <circle cx="450" cy="600" r="110"/>
+  </g>
+</svg>

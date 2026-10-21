@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { PoMenuPanelItem, PoMenuPanelModule, PoPageModule } from '@po-ui/ng-components';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-masterpage',
@@ -10,6 +11,8 @@ import { PoMenuPanelItem, PoMenuPanelModule, PoPageModule } from '@po-ui/ng-comp
   styleUrl: './masterpage.css',
 })
 export class Masterpage {
+  #authService = inject(AuthService);
+  readonly nomeUsuario = this.#authService.getSessao()?.nome ?? '';
   title = 'Home';
   readonly menus: Array<PoMenuPanelItem>=[
     {label:'Home',link:'home',action:this.clickItemMenu.bind(this),icon:'an an-house'},

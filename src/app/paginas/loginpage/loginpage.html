@@ -1,1 +1,10 @@
-<p>loginpage works!</p>
+<po-page-login
+    p-product-name="Mini CRM"
+    p-logo="images/logo-minicrm.svg"
+    p-background="images/login-background.svg"
+    [p-login]="loginLembrado"
+    [p-loading]="isLoading"
+    [p-login-errors]="loginErrors"
+    p-register-url="/register"
+    (p-login-submit)="onLoginSubmit($event)"
+></po-page-login>

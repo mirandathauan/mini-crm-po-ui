@@ -1,0 +1,58 @@
+<div class="register-page">
+    <div class="register-card">
+        <div class="register-header">
+            <img src="images/logo-minicrm.svg" alt="Mini CRM" class="register-logo" />
+            <h1>Criar Conta</h1>
+            <p>Preencha os dados para acessar o Mini CRM</p>
+        </div>
+
+        <div class="po-row">
+            <po-input
+                class="po-sm-12"
+                p-label="Nome completo"
+                p-required="true"
+                [(ngModel)]="novoUsuario.nome"
+                [ngModelOptions]="{standalone: true}"
+            ></po-input>
+        </div>
+        <div class="po-row">
+            <po-email
+                class="po-sm-12"
+                p-label="Email"
+                p-required="true"
+                [(ngModel)]="novoUsuario.email"
+                [ngModelOptions]="{standalone: true}"
+            ></po-email>
+        </div>
+        <div class="po-row">
+            <po-input
+                class="po-sm-12"
+                p-label="Usuário (login)"
+                p-required="true"
+                [(ngModel)]="novoUsuario.login"
+                [ngModelOptions]="{standalone: true}"
+            ></po-input>
+        </div>
+        <div class="po-row">
+            <po-password
+                class="po-sm-12 po-md-6"
+                p-label="Senha"
+                p-required="true"
+                [(ngModel)]="novoUsuario.senha"
+                [ngModelOptions]="{standalone: true}"
+            ></po-password>
+            <po-password
+                class="po-sm-12 po-md-6"
+                p-label="Confirmar senha"
+                p-required="true"
+                [(ngModel)]="confirmarSenha"
+                [ngModelOptions]="{standalone: true}"
+            ></po-password>
+        </div>
+
+        <div class="register-actions">
+            <po-button p-label="Criar conta" p-kind="primary" [p-loading]="isLoading" (p-click)="criarConta()"></po-button>
+            <po-button p-label="Já tenho conta" p-kind="tertiary" (p-click)="voltarLogin()"></po-button>
+        </div>
+    </div>
+</div>
