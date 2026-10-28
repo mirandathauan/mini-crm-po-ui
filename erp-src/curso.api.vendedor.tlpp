@@ -1,0 +1,41 @@
+#include 'totvs.ch'
+#include 'tlpp-core.th'
+
+@get('/curso/api/vendedor/:coduser')
+Function U_GETVEND
+
+    Local jResult := jsonObject():new()
+    Local jPath   := oRest:getPathParamsRequest()
+    Local cCodUsr := jPath['coduser']
+
+    IF empty(cCodUsr)
+        
+        jResult['status'    ] := 'ERRO'
+        jResult['codigo'    ] := ''
+        jResult['message'   ] := 'usuario nao informado'
+
+        oRest:setResponse(jResult:toJson())
+        return .F.
+
+    EndIF
+
+    SA3->(dbSetOrder(7),dbSeek(xFilial(alias())+cCodUsr))
+
+    IF !SA3->(found()) 
+        
+        jResult['status'    ] := 'ERRO'
+        jResult['codigo'    ] := ''
+        jResult['message'   ] := 'usuario nao encontrado'
+
+        oRest:setResponse(jResult:toJson())
+        return .F. 
+
+    EndIF
+
+    jResult['status'    ]   := 'OK'
+    jResult['codigo'    ]   := SA3->A3_COD
+    jResult['message'   ]   := ''       
+
+    oRest:setResponse(jResult:toJson())
+
+return .T.

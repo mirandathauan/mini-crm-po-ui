@@ -1,0 +1,93 @@
+#include 'totvs.ch'
+#include 'tlpp-core.th'
+
+namespace curso.api.dashboard
+
+/*/{Protheus.doc} U_GETORCAMENTOS
+    API para consulta de dados de orcamentos cadastrados x aprovados
+    @type  Function
+    @author Klaus Wolfgram
+    /*/
+    @get('/curso/api/dashboard/orcamentos')
+Function U_GETORCAMENTOS()
+
+    Local cAliasSQL := getNextAlias()
+    Local aDados    := array(0)
+    Local jResult   := jsonObject():new()
+
+    BeginSQL alias cAliasSQL
+
+        SELECT STATUS, COUNT(CJ_NUM) QUANTIDADE FROM (
+            SELECT 
+                CASE CJ_STATUS WHEN 'A' THEN 'ABERTOS' WHEN 'B' THEN 'APROVADOS' WHEN 'C' THEN 'CANCELADOS' WHEN 'D' THEN 'NAO ORCADOS' ELSE 'OUTROS' END STATUS,
+                CJ_NUM
+            FROM %table:SCJ% SCJ 
+            WHERE SCJ.D_E_L_E_T_ = ' '
+            AND LEFT(CJ_EMISSAO,4) = %exp:cValToChar(year(date()))% 
+            ) AS ORCAMENTOS
+        GROUP BY STATUS
+
+    EndSQL
+
+    While !(cAliasSQL)->(eof())
+
+        jSerie          := jsonObject():new()
+        jSerie['label'] := (cAliasSQL)->STATUS
+        jSerie['data' ] := {(cAliassQL)->QUANTIDADE}
+
+        aadd(aDados,jSerie)
+
+        (cAliasSQL)->(dbSkip())
+
+    Enddo
+
+    (cAliasSQL)->(dbCloseArea())
+
+    jResult['series'] := aDados
+    oRest:setResponse(jResult:toJson())
+    
+Return .T.
+
+/*/{Protheus.doc} U_GETPEDIDOS
+    API para consulta de dados de pedidos faturados
+    @type  Function
+    /*/
+        @get('/curso/api/dashboard/pedidos')
+Function U_GETPEDIDOS()
+
+    Local cAliasSQL := getNextAlias()
+    Local aDados    := array(0)
+    Local jResult   := jsonObject():new()
+
+    BeginSQL alias cAliasSQL
+
+        SELECT STATUS, COUNT(C5_NUM) QUANTIDADE FROM (
+            SELECT 
+                CASE C5_NOTA WHEN ' ' THEN 'ABERTOS' ELSE 'FATURADOS' END STATUS,
+                C5_NUM
+            FROM %table:SC5% SC5 
+            WHERE SC5.D_E_L_E_T_ = ' '
+            AND LEFT(C5_EMISSAO,4) = %exp:cValToChar(year(date()))% 
+            ) AS PEDIDOS
+        GROUP BY STATUS
+
+    EndSQL
+
+    While !(cAliasSQL)->(eof())
+
+        jSerie          := jsonObject():new()
+        jSerie['label'] := (cAliasSQL)->STATUS
+        jSerie['data' ] := {(cAliassQL)->QUANTIDADE}
+
+        aadd(aDados,jSerie)
+
+        (cAliasSQL)->(dbSkip())
+
+    Enddo
+
+    (cAliasSQL)->(dbCloseArea())
+
+    jResult['series'] := aDados
+    oRest:setResponse(jResult:toJson())    
+
+Return .T.
