@@ -1,29 +1,41 @@
 import { Component, inject } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { PoMenuPanelItem, PoMenuPanelModule, PoPageModule } from '@po-ui/ng-components';
+import { Router, RouterModule } from '@angular/router';
+import { PoMenuItem, PoMenuModule, PoPageModule, PoToolbarAction, PoToolbarModule, PoToolbarProfile } from '@po-ui/ng-components';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-masterpage',
   standalone: true,
-  imports: [PoMenuPanelModule, PoPageModule, RouterModule],
+  imports: [PoMenuModule, PoPageModule, PoToolbarModule, RouterModule],
   templateUrl: './masterpage.html',
   styleUrl: './masterpage.css',
 })
 export class Masterpage {
   #authService = inject(AuthService);
+  #router = inject(Router);
   readonly nomeUsuario = this.#authService.getSessao()?.nome ?? '';
   title = 'Home';
-  readonly menus: Array<PoMenuPanelItem>=[
-    {label:'Home',link:'home',action:this.clickItemMenu.bind(this),icon:'an an-house'},
-    {label:'Customers',link:'customers',action:this.clickItemMenu.bind(this),icon:'an an-user'},
-    {label:'Prospects',link:'prospects',action:this.clickItemMenu.bind(this),icon:'an an-user-plus'},
-    {label:'Products',link:'catalog',action:this.clickItemMenu.bind(this),icon:'an an-grid-four'},
-    {label:'Budgets',link:'budgets',action:this.clickItemMenu.bind(this),icon:'an an-shopping-cart'},
-    {label:'Exit',link:'logoff',action:this.clickItemMenu.bind(this),icon:'an an-sign-out'}
+
+  readonly profile: PoToolbarProfile = {
+    title: this.nomeUsuario || 'Usuário',
+    subtitle: this.#authService.getSessao()?.email ?? '',
+  };
+
+  readonly profileActions: Array<PoToolbarAction> = [
+    { label: 'Sair', icon: 'an an-sign-out', action: () => this.#router.navigate(['/logoff']) },
+  ];
+
+  readonly menus: Array<PoMenuItem>=[
+    {label:'Home',shortLabel:'Home',link:'home',action:this.clickItemMenu.bind(this),icon:'an an-house'},
+    {label:'Customers',shortLabel:'Customers',link:'customers',action:this.clickItemMenu.bind(this),icon:'an an-user'},
+    {label:'Prospects',shortLabel:'Prospects',link:'prospects',action:this.clickItemMenu.bind(this),icon:'an an-user-plus'},
+    {label:'Products',shortLabel:'Products',link:'catalog',action:this.clickItemMenu.bind(this),icon:'an an-grid-four'},
+    {label:'Budgets',shortLabel:'Budgets',link:'budgets',action:this.clickItemMenu.bind(this),icon:'an an-shopping-cart'},
+    {label:'Exit',shortLabel:'Exit',link:'logoff',action:this.clickItemMenu.bind(this),icon:'an an-sign-out'}
 
   ]
-  clickItemMenu(menu: PoMenuPanelItem):void{
+
+  clickItemMenu(menu: PoMenuItem):void{
     this.title = menu.label
 
   }

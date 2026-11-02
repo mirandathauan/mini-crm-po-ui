@@ -1,9 +1,12 @@
-<div class="po-wrapper-menu-panel">
-    <po-menu-panel [p-menus]="menus" p-logo="images/crm128.png"></po-menu-panel>
+<po-toolbar
+    p-title="Mini CRM"
+    [p-profile]="profile"
+    [p-profile-actions]="profileActions"
+    [p-show-notification]="false"
+></po-toolbar>
+<div class="po-wrapper">
+    <po-menu [p-menus]="menus" p-logo="images/crm128.png" p-short-logo="images/crm128.png"></po-menu>
     <po-page-default [p-title]="title">
-        @if (nomeUsuario) {
-            <p class="po-text-color-07 masterpage-welcome">Bem-vindo, {{ nomeUsuario }}</p>
-        }
         <router-outlet></router-outlet>
     </po-page-default>
 </div>
