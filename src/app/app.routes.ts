@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { Masterpage } from './paginas/masterpage/masterpage';
 import { Home } from './paginas/home/home';
+import { Dashboardpage } from './paginas/dashboardpage/dashboardpage';
 import { Customerpage } from './paginas/customerpage/customerpage';
 import { Prospects } from './paginas/prospects/prospects';
 import { Catalogpage } from './paginas/catalogpage/catalogpage';
@@ -21,6 +22,7 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: 'home', component: Home, canActivate: [authGuard] },
+      { path: 'dashboard', component: Dashboardpage, canActivate: [authGuard] },
       { path: 'customers', component: Customerpage, canActivate: [authGuard] },
       { path: 'prospects', component: Prospects, canActivate: [authGuard] },
       { path: 'catalog', component: Catalogpage, canActivate: [authGuard] },

@@ -27,6 +27,7 @@ export class Masterpage {
 
   readonly menus: Array<PoMenuItem>=[
     {label:'Home',shortLabel:'Home',link:'home',action:this.clickItemMenu.bind(this),icon:'an an-house'},
+    {label:'Dashboard',shortLabel:'Dashboard',link:'dashboard',action:this.clickItemMenu.bind(this),icon:'an an-chart-bar'},
     {label:'Customers',shortLabel:'Customers',link:'customers',action:this.clickItemMenu.bind(this),icon:'an an-user'},
     {label:'Prospects',shortLabel:'Prospects',link:'prospects',action:this.clickItemMenu.bind(this),icon:'an an-user-plus'},
     {label:'Products',shortLabel:'Products',link:'catalog',action:this.clickItemMenu.bind(this),icon:'an an-grid-four'},

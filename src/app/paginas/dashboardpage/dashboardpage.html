@@ -1,0 +1,39 @@
+<po-page-default p-title="Dashboard">
+    @if (isLoading) {
+        <po-loading-overlay [p-screen-lock]="true"></po-loading-overlay>
+    }
+
+    <div class="po-row">
+        <po-widget class="po-sm-6 po-md-3" p-title="Orçamentos Abertos">
+            <h2 class="dashboard-kpi-value">{{ valorSerie('ABERTOS', orcamentosSeries) }}</h2>
+        </po-widget>
+        <po-widget class="po-sm-6 po-md-3" p-title="Orçamentos Aprovados">
+            <h2 class="dashboard-kpi-value">{{ valorSerie('APROVADOS', orcamentosSeries) }}</h2>
+        </po-widget>
+        <po-widget class="po-sm-6 po-md-3" p-title="Pedidos Abertos">
+            <h2 class="dashboard-kpi-value">{{ valorSerie('ABERTOS', pedidosSeries) }}</h2>
+        </po-widget>
+        <po-widget class="po-sm-6 po-md-3" p-title="Pedidos Faturados">
+            <h2 class="dashboard-kpi-value">{{ valorSerie('FATURADOS', pedidosSeries) }}</h2>
+        </po-widget>
+    </div>
+
+    <div class="po-row">
+        <div class="po-sm-12 po-md-6">
+            <po-divider p-label="Orçamentos no ano" p-border-width="medium"></po-divider>
+            @if (orcamentosSeries.length) {
+                <po-chart [p-series]="orcamentosSeries" [p-type]="chartType" p-title="Orçamentos por status" [p-height]="280"></po-chart>
+            } @else {
+                <po-info p-label="Orçamentos" p-value="Sem dados no período."></po-info>
+            }
+        </div>
+        <div class="po-sm-12 po-md-6">
+            <po-divider p-label="Pedidos no ano" p-border-width="medium"></po-divider>
+            @if (pedidosSeries.length) {
+                <po-chart [p-series]="pedidosSeries" [p-type]="chartType" p-title="Pedidos por status" [p-height]="280"></po-chart>
+            } @else {
+                <po-info p-label="Pedidos" p-value="Sem dados no período."></po-info>
+            }
+        </div>
+    </div>
+</po-page-default>
