@@ -4,22 +4,26 @@
     }
 
     <div class="po-row">
-        <po-widget class="po-sm-6 po-md-3" p-title="Orçamentos Abertos">
+        <po-widget class="po-sm-6 po-md-3 dashboard-kpi dashboard-kpi-info" p-title="Orçamentos Abertos">
+            <span class="dashboard-kpi-icon an an-hourglass"></span>
             <h2 class="dashboard-kpi-value">{{ valorSerie('ABERTOS', orcamentosSeries) }}</h2>
         </po-widget>
-        <po-widget class="po-sm-6 po-md-3" p-title="Orçamentos Aprovados">
+        <po-widget class="po-sm-6 po-md-3 dashboard-kpi dashboard-kpi-positive" p-title="Orçamentos Aprovados">
+            <span class="dashboard-kpi-icon an an-check-circle"></span>
             <h2 class="dashboard-kpi-value">{{ valorSerie('APROVADOS', orcamentosSeries) }}</h2>
         </po-widget>
-        <po-widget class="po-sm-6 po-md-3" p-title="Pedidos Abertos">
+        <po-widget class="po-sm-6 po-md-3 dashboard-kpi dashboard-kpi-info" p-title="Pedidos Abertos">
+            <span class="dashboard-kpi-icon an an-clock"></span>
             <h2 class="dashboard-kpi-value">{{ valorSerie('ABERTOS', pedidosSeries) }}</h2>
         </po-widget>
-        <po-widget class="po-sm-6 po-md-3" p-title="Pedidos Faturados">
+        <po-widget class="po-sm-6 po-md-3 dashboard-kpi dashboard-kpi-positive" p-title="Pedidos Faturados">
+            <span class="dashboard-kpi-icon an an-package"></span>
             <h2 class="dashboard-kpi-value">{{ valorSerie('FATURADOS', pedidosSeries) }}</h2>
         </po-widget>
     </div>
 
-    <div class="po-row">
-        <div class="po-sm-12 po-md-6">
+    <div class="po-row dashboard-charts">
+        <div class="po-sm-12 po-md-6 dashboard-chart-card">
             <po-divider p-label="Orçamentos no ano" p-border-width="medium"></po-divider>
             @if (orcamentosSeries.length) {
                 <po-chart [p-series]="orcamentosSeries" [p-type]="chartType" p-title="Orçamentos por status" [p-height]="280"></po-chart>
@@ -27,7 +31,7 @@
                 <po-info p-label="Orçamentos" p-value="Sem dados no período."></po-info>
             }
         </div>
-        <div class="po-sm-12 po-md-6">
+        <div class="po-sm-12 po-md-6 dashboard-chart-card">
             <po-divider p-label="Pedidos no ano" p-border-width="medium"></po-divider>
             @if (pedidosSeries.length) {
                 <po-chart [p-series]="pedidosSeries" [p-type]="chartType" p-title="Pedidos por status" [p-height]="280"></po-chart>

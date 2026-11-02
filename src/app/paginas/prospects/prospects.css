@@ -1,3 +1,17 @@
+.prospects-filter-card {
+    background-color: #ffffff;
+    border: 1px solid var(--color-neutral-light-20, #e4e7ec);
+    border-left: 4px solid var(--color-brand-01-base);
+    border-radius: 8px;
+    padding: 16px 16px 4px 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 6px rgba(10, 107, 130, 0.06);
+}
+
+.prospects-sort-row {
+    margin-top: -8px;
+}
+
 .po-list-view-actions {
     display: flex;
     align-items: center;
@@ -7,14 +21,4 @@
 .po-prospect-save-button {
     margin-top: 8px;
     justify-content: flex-end;
-}
-
-.po-prospect-filter-group {
-    display: flex;
-    align-items: flex-end;
-    gap: 4px;
-}
-
-.po-prospect-filter-input {
-    flex: 1;
 }

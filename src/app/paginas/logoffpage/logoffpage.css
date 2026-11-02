@@ -1,0 +1,9 @@
+.logoff-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 60vh;
+    color: var(--color-neutral-mid-40, #6b7786);
+}

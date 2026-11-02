@@ -1,1 +1,21 @@
-<p>home works!</p>
+<po-page-default p-title="Home">
+    <div class="home-hero">
+        <div class="home-hero-text">
+            <h1>Bem-vindo{{ nomeUsuario ? ', ' + nomeUsuario : '' }}!</h1>
+            <p>Gerencie clientes, prospects, catálogo e orçamentos em um só lugar.</p>
+        </div>
+    </div>
+
+    <div class="po-row home-quick-links">
+        @for (item of quickLinks; track item.link) {
+            <po-widget
+                class="po-sm-12 po-md-6 po-lg-4 po-xl-2 home-quick-link"
+                [p-title]="item.title"
+                (p-click)="irPara(item.link)"
+            >
+                <span class="home-quick-link-icon" [class]="item.icon"></span>
+                <p class="home-quick-link-desc">{{ item.description }}</p>
+            </po-widget>
+        }
+    </div>
+</po-page-default>

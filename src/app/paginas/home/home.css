@@ -1,0 +1,47 @@
+.home-hero {
+    background: linear-gradient(135deg, #042a33 0%, #0a6b82 55%, #0b1030 100%);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 24px;
+    color: #f4f7ff;
+    box-shadow: 0 12px 30px rgba(10, 107, 130, 0.25);
+}
+
+.home-hero-text h1 {
+    margin: 0 0 8px 0;
+    font-size: 1.8rem;
+    color: #f4f7ff;
+}
+
+.home-hero-text p {
+    margin: 0;
+    color: #f4f7ff;
+    opacity: 0.85;
+}
+
+.home-quick-links {
+    margin-top: 8px;
+}
+
+.home-quick-link {
+    cursor: pointer;
+    --border-color-hover: var(--color-brand-01-base);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.home-quick-link:hover {
+    transform: translateY(-4px);
+}
+
+.home-quick-link-icon {
+    display: block;
+    font-size: 2rem;
+    color: var(--color-brand-01-base);
+    margin-bottom: 8px;
+}
+
+.home-quick-link-desc {
+    color: var(--color-neutral-mid-40, #6b7786);
+    font-size: 0.85rem;
+    margin: 0;
+}

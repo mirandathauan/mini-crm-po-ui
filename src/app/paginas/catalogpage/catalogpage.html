@@ -2,7 +2,7 @@
     @if (isLoading) {
         <po-loading-overlay [p-screen-lock]="true"></po-loading-overlay>
     }
-    <div class="po-row">
+    <div class="po-row catalog-filter-card">
         <po-select
             class="po-sm-12 po-md-5 po-lg-4 po-xl-4"
             p-label="Cliente"
@@ -75,7 +75,7 @@
                     </div>
                 </div>
             }
-            <p class="po-cart-total"><strong>Total: {{ cartTotalValor | currency:'BRL' }}</strong></p>
+            <p class="po-cart-total">Total: <strong>{{ cartTotalValor | currency:'BRL' }}</strong></p>
             <div class="po-row po-cart-finalizar">
                 <div class="po-sm-12 po-md-4 po-lg-4 po-xl-4">
                     <po-button

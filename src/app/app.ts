@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterModule } from "@angular/router";
+import { PoThemeService } from '@po-ui/ng-components';
+import { minicrmTheme } from './theme/minicrm-theme';
 
 @Component({
   selector: 'app-root',
@@ -10,4 +12,9 @@ import { RouterModule } from "@angular/router";
   `
 })
 export class App {
+  #themeService = inject(PoThemeService);
+
+  constructor() {
+    this.#themeService.setTheme(minicrmTheme);
+  }
 }

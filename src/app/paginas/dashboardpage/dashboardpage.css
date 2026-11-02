@@ -1,6 +1,44 @@
-.dashboard-kpi-value {
+.dashboard-kpi {
     text-align: center;
+    --border-color-hover: var(--color-brand-01-base);
+    transition: transform 0.15s ease;
+}
+
+.dashboard-kpi:hover {
+    transform: translateY(-3px);
+}
+
+.dashboard-kpi-icon {
+    display: block;
+    font-size: 1.6rem;
+    margin-bottom: 4px;
+}
+
+.dashboard-kpi-value {
     font-size: 2rem;
     font-weight: 700;
-    margin: 8px 0;
+    margin: 4px 0;
+}
+
+.dashboard-kpi-info .dashboard-kpi-icon,
+.dashboard-kpi-info .dashboard-kpi-value {
+    color: var(--color-feedback-info-base, #23489f);
+}
+
+.dashboard-kpi-positive .dashboard-kpi-icon,
+.dashboard-kpi-positive .dashboard-kpi-value {
+    color: var(--color-feedback-positive-base, #107048);
+}
+
+.dashboard-charts {
+    margin-top: 8px;
+}
+
+.dashboard-chart-card {
+    background-color: #ffffff;
+    border: 1px solid var(--color-neutral-light-20, #e4e7ec);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 6px rgba(10, 107, 130, 0.06);
 }
