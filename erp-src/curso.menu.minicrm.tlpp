@@ -1,0 +1,20 @@
+#include 'totvs.ch'
+
+/*/{Protheus.doc} MINICRM
+    Abre o Mini CRM (aplicacao Angular) no navegador padrao do usuario.
+    Rotina destinada a ser registrada como item de menu no Configurador (SIGACFG).
+
+    Importante: o ShellExecute so abre no navegador da maquina do usuario quando
+    executado via conexao SmartClient (nao funciona abrindo o navegador do
+    AppServer quando chamado via Web/REST).
+    @type  Function
+    @author Thauan Miranda
+    @since 02/11/2026
+    /*/
+User Function MINICRM()
+
+    Local cUrl := "http://localhost:4200"
+
+    ShellExecute("open", cUrl, "", "", 1)
+
+Return
